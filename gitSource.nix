@@ -6,6 +6,7 @@
 # Usage:
 # filteredPath = import nix/gitSource.nix { inherit pkgs; } <PATH>
 
+# Based on Joachim Breitner's excellent example at
 # https://github.com/NixOS/nix/issues/2944
 
 # The function call
