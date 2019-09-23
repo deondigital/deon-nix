@@ -59,7 +59,7 @@ let
 
   lines = s: filter (x : x != [] && x != "") (split "\n" s);
 
-  gitDatabase = gitRootDir + "/.git"
+  gitDatabase = gitRootDir + "/.git";
 in
 
 if builtins.pathExists gitDatabase
