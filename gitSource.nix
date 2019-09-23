@@ -1,4 +1,6 @@
 { pkgs
+  # Root of git project
+, gitRootDir
   # Optional extra filtering of the git-tracked files.
 , extraFilter ? p: t: true
 , grepFor ? ""
@@ -56,24 +58,26 @@ let
       s;
 
   lines = s: filter (x : x != [] && x != "") (split "\n" s);
+
+  gitDatabase = gitRootDir + "/.git"
 in
 
-if builtins.pathExists ../.git
+if builtins.pathExists gitDatabase
 then
   let
     git_dir =
-      if builtins.pathExists ../.git/index
-      then ../.git
+      if builtins.pathExists (gitDatabase + "/index")
+      then gitDatabase
       else # likely a git worktree, so follow the indirection
         let
-          git_content = lines (readFile ./../.git);
+          git_content = lines (readFile gitDatabase);
           first_line = head git_content;
           prefix = "gitdir: ";
           ok = length git_content == 1 && has_prefix prefix first_line;
         in
           if ok
           then /. + remove_prefix prefix first_line
-          else abort "gitSource.nix: Cannot parse ${toString ./../.git}";
+          else abort "gitSource.nix: Cannot parse ${toString gitDatabase}";
 
     whitelist_file =
       pkgs.runCommand "git-ls-files" {envVariable = true;} ''
@@ -85,18 +89,18 @@ then
 
     whitelist = lines (readFile (whitelist_file.out));
 
-    filter = filter_from_list ../. whitelist;
+    filter = filter_from_list gitRootDir whitelist;
   in
     subdir: path {
       name = baseNameOf (toString subdir);
-      path = if isString subdir then (../. + "/${subdir}") else subdir;
+      path = if isString subdir then (gitRootDir + "/${subdir}") else subdir;
       filter = filter;
     }
 
 else
-  trace "gitSource.nix: ${toString ../.} does not seem to be a git repository,\nassuming it is a clean checkout." (
+  trace "gitSource.nix: ${toString gitRootDir} does not seem to be a git repository,\nassuming it is a clean checkout." (
     subdir: path {
       name = baseNameOf (toString subdir);
-      path = if isString subdir then (../. + "/${subdir}") else subdir;
+      path = if isString subdir then (gitRootDir + "/${subdir}") else subdir;
     }
   )
