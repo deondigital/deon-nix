@@ -23,9 +23,11 @@ rec {
     p = builtins.fromJSON (builtins.readFile pins.haskell-nix);
   in
     import (builtins.fetchGit {
-      name = "haskell.nix";
+      name = "haskell-nix-lib";
       inherit (p) url rev;
-    });
+    }) {
+      inherit pkgs;
+    };
 
   /*
    * Download/build all NPM dependencies for a Node package ('npm install').
