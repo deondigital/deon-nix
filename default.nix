@@ -32,10 +32,11 @@ rec {
   /*
    * Download/build all NPM dependencies for a Node package ('npm install').
    */
-  buildNodeDependencies = name: srcPath: pkgs.stdenv.mkDerivation {
+  buildNodeDependencies = { name, srcPath, gitRootDir }: pkgs.stdenv.mkDerivation {
     name = "${name}-dependencies";
     nativeBuildInputs = [ pkgs.nodejs ];
     src = filters.gitTrackedFiles {
+      inherit gitRootDir;
       extraFilter = p: t: filters.isFileWithName p t ["package.json" "package-lock.json"];
     } srcPath;
     buildPhase = ''
