@@ -3,11 +3,9 @@
 , gitRootDir
   # Optional extra filtering of the git-tracked files.
 , extraFilter ? p: t: true
+  # If set then the result of `git ls-files` grepped with this string.
 , grepFor ? ""
 }:
-# Usage:
-# filteredPath = import nix/gitSource.nix { inherit pkgs; } <PATH>
-
 # Based on Joachim Breitner's excellent example at
 # https://github.com/NixOS/nix/issues/2944
 
