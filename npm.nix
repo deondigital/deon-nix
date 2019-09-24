@@ -3,19 +3,13 @@
 pkgs.stdenv.mkDerivation rec {
   name = "npm";
   version = "6.11.3";
-  nativeBuildInputs = [ pkgs.perl ];
   propagatedBuildInputs = [ pkgs.nodejs ];
-  src = builtins.fetchTarball "https://github.com/npm/cli/archive/v${version}.tar.gz";
+  unpackPhase = "true"; # No sources
   configurePhase = ''
     mkdir -p $out
     export HOME=$TMP
-    cat << EOF > $HOME/.npmrc
-    prefix = $out/.npm-packages
-    EOF
+    npm config set prefix $out
   '';
-  postInstall = ''
-    mkdir $out/bin
-    ln -s $out/.npm-packages/bin/npm $out/bin/npm
-    ln -s $out/.npm-packages/bin/npx $out/bin/npx
-  '';
+  dontBuild = true;
+  installPhase = "npm install npm@${version} -g";
 }
