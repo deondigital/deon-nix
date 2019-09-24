@@ -14,6 +14,7 @@ rec {
     }) {
       overlays = [
         (import overlays/jdk.nix { inherit pkgs; })
+        (import overlays/nodejs.nix { inherit pkgs; })
       ];
     };
 
