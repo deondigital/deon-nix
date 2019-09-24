@@ -6,5 +6,16 @@ pkgs.stdenv.mkDerivation rec {
   nativeBuildInputs = [ pkgs.perl ];
   propagatedBuildInputs = [ pkgs.nodejs ];
   src = builtins.fetchTarball "https://github.com/npm/cli/archive/v${version}.tar.gz";
-  configurePhase = "export HOME=$TMP";
+  configurePhase = ''
+    mkdir -p $out
+    export HOME=$TMP
+    cat << EOF > $HOME/.npmrc
+    prefix = $out/.npm-packages
+    EOF
+  '';
+  postInstall = ''
+    mkdir $out/bin
+    ln -s .npm-packages/bin/npm bin/npm
+    ln -s .npm-packages/bin/npx bin/npx
+  '';
 }
