@@ -14,8 +14,9 @@ rec {
     }) {
       overlays = [
         (import overlays/jdk.nix { inherit pkgs; })
-        (import overlays/nodejs.nix { inherit pkgs; })
       ];
+    } // {
+        npm = import ./npm.nix { inherit pkgs; };
     };
 
   filters = import ./filters.nix { inherit pkgs; };
@@ -35,7 +36,7 @@ rec {
    */
   buildNodeDependencies = { name, srcPath, gitRootDir }: pkgs.stdenv.mkDerivation {
     name = "${name}-dependencies";
-    nativeBuildInputs = [ pkgs.nodejs ];
+    nativeBuildInputs = [ pkgs.npm ];
     src = filters.gitTrackedFiles {
       inherit gitRootDir;
       extraFilter = p: t: filters.isFileWithName p t ["package.json" "package-lock.json"];
