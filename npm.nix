@@ -15,7 +15,7 @@ pkgs.stdenv.mkDerivation rec {
   '';
   postInstall = ''
     mkdir $out/bin
-    ln -s .npm-packages/bin/npm bin/npm
-    ln -s .npm-packages/bin/npx bin/npx
+    ln -s .npm-packages/bin/npm $out/bin/npm
+    ln -s .npm-packages/bin/npx $out/bin/npx
   '';
 }
