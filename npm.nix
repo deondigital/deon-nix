@@ -8,7 +8,7 @@ pkgs.stdenv.mkDerivation rec {
     url = "https://github.com/npm/cli/archive/v${version}.tar.gz";
     sha256 = "0hwmwawdcdqx1fs03pd4lzjjr3l626fj6drcf7qg3p3ivqm9i181";
   };
-  dontBuild = true;
+  phases = [ "unpackPhase" "installPhase" ];
   installPhase = ''
     mkdir $out
     cp -R bin lib node_modules package.json package-lock.json $out/.
