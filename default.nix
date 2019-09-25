@@ -34,22 +34,34 @@ rec {
   /*
    * Download/build all NPM dependencies for a Node package ('npm install').
    */
-  buildNodeDependencies = { name, srcPath, gitRootDir }: pkgs.stdenv.mkDerivation {
-    name = "${name}-dependencies";
-    nativeBuildInputs = [ pkgs.npm ];
-    src = filters.gitTrackedFiles {
-      inherit gitRootDir;
-      extraFilter = p: t: filters.isFileWithName p t ["package.json" "package-lock.json"];
-    } srcPath;
-    buildPhase = ''
-      export HOME=$TMP
-      npm install
-    '';
-    installPhase = ''
-      mkdir $out
-      cp -r node_modules $out/
-      cp package.json $out/
-      cp package-lock.json $out/
-    '';
-  };
+  buildNodeDependencies = { name, srcPath, gitRootDir }: let
+    call-node2nix = pkgs.stdenv.mkDerivation {
+      name = "${name}-node2nix";
+      src = filters.gitTrackedFiles {
+        inherit gitRootDir;
+        extraFilter = p: t: filters.isFileWithName p t [ "package.json" "package-lock.json" ];
+      } srcPath;
+      nativeBuildInputs = [ pkgs.nodePackages.node2nix ];
+      buildPhase = ''
+        node2nix --nodejs-10 --include-peer-dependencies --development -l package-lock.json
+      '';
+      installPhase = ''
+        mkdir $out
+        cp node-packages.nix node-env.nix default.nix package.json $out/
+      '';
+    };
+    node-packages = builtins.mapAttrs (name: spec:
+      spec.override {
+        dontNpmInstall = true;
+      }) (pkgs.callPackage call-node2nix { inherit pkgs; });
+  in
+    pkgs.stdenv.mkDerivation {
+      name = "${name}-dependencies";
+      unpackPhase = "true";
+      dontBuild = true;
+      installPhase = ''
+        mkdir $out
+        ln -s ${node-packages.package}/lib/node_modules/${name}/node_modules $out/node_modules
+      '';
+    };
 }
