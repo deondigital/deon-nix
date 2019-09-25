@@ -15,8 +15,6 @@ rec {
       overlays = [
         (import overlays/jdk.nix { inherit pkgs; })
       ];
-    } // {
-        npm = import ./npm.nix { inherit pkgs; };
     };
 
   filters = import ./filters.nix { inherit pkgs; };
