@@ -52,6 +52,7 @@ rec {
       spec.override {
         dontNpmInstall = true;
       }) (pkgs.callPackage call-node2nix { inherit pkgs; });
+    package-name = (builtins.fromJSON (builtins.readFile (srcPath + "/package.json"))).name;
   in
     pkgs.stdenv.mkDerivation {
       name = "${name}-dependencies";
@@ -59,7 +60,7 @@ rec {
       dontBuild = true;
       installPhase = ''
         mkdir $out
-        ln -s ${node-packages.package}/lib/node_modules/${name}/node_modules $out/node_modules
+        ln -s ${node-packages.package}/lib/node_modules/${package-name}/node_modules $out/node_modules
       '';
     };
 }
