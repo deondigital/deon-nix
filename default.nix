@@ -63,4 +63,61 @@ rec {
         ln -s ${node-packages.package}/lib/node_modules/${package-name}/node_modules $out/node_modules
       '';
     };
+
+  gradle2nix = pkgs.callPackage (
+    builtins.fetchGit {
+      name = "gradle2nix-src";
+      url = "https://github.com/bjornbugge/gradle2nix";
+      ref = "master";
+      rev = "b2b0733c191dda0de1e77800d722577f265b0be5";
+    }
+  ) {};
+
+  gradle2nix-shell = pkgs.stdenv.mkDerivation {
+    name = "gradle2nix-shell";
+    buildInputs =
+      [ pkgs.openjdk
+        gradle2nix
+      ];
+  };
+
+  buildGradle =
+    { name
+    , src
+    , nixFile
+    , credentials ? []
+    , noMavenLocal ? true
+    , ...
+    }@args:
+    let
+      builder = pkgs.callPackage nixFile {
+        fetchurl = let
+          netrc-file = pkgs.writeTextFile {
+            name = "netrc";
+            text = builtins.concatStringsSep "" (map (
+              m: ''
+                machine ${m.machine}
+                  login ${m.login}
+                  password ${m.password}
+              '') credentials);
+          };
+        in
+          args: pkgs.fetchurl (args // {
+            curlOpts =
+              if credentials != []
+              then "--netrc-file ${netrc-file}"
+              else "";
+            urls =
+              if noMavenLocal
+              then builtins.filter (url:
+                builtins.match
+                  "file:.*/\.m2/repository/.*"
+                  url == null) (args.urls or [])
+              else args.urls or [];
+          });
+      };
+    in builder (builtins.removeAttrs args
+      [ "credentials"
+        "noMavenLocal"
+      ]);
 }
