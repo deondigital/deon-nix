@@ -69,7 +69,7 @@ rec {
       name = "gradle2nix-src";
       url = "https://github.com/bjornbugge/gradle2nix";
       ref = "master";
-      rev = "b2b0733c191dda0de1e77800d722577f265b0be5";
+      rev = "3f7dbf68cdb0059ffe8aca338e66031d8f571ecb";
     }
   ) {};
 
