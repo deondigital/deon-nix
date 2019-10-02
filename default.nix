@@ -86,7 +86,6 @@ rec {
     , src
     , nixFile
     , credentials ? []
-    , noMavenLocal ? true
     , ...
     }@args:
     let
@@ -107,17 +106,10 @@ rec {
               if credentials != []
               then "--netrc-file ${netrc-file}"
               else "";
-            urls =
-              if noMavenLocal
-              then builtins.filter (url:
-                builtins.match
-                  "file:.*/\.m2/repository/.*"
-                  url == null) (args.urls or [])
-              else args.urls or [];
           });
       };
     in builder (builtins.removeAttrs args
       [ "credentials"
-        "noMavenLocal"
+        "nixFile"
       ]);
 }
